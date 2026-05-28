@@ -1,0 +1,39 @@
+const dns = require('dns');
+dns.setServers(['1.1.1.1', '8.8.8.8']);
+
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+
+const app = express();
+require("dotenv").config();
+
+const port = process.env.port;
+const mongo_url = process.env.mongo_url;
+
+const { createAccount, login, logout } = require("./controllers/user");
+const {createProduct,getProducts,deleteProduct} = require("./controllers/product")
+
+const auth = require("./middleware/auth");
+
+app.use(express.json());
+app.use(cors());
+
+app.post("/signin", createAccount);
+app.post("/login", login);
+app.post("/logout", logout);
+
+app.post("/create-product", createProduct);
+app.get("/get-products",getProducts);
+app.get("/api/delete-products/:id",deleteProduct);
+
+mongoose.connect(mongo_url)
+.then(() => {
+    console.log("MongoDB Connected");
+    app.listen(port, () => {
+        console.log(`Server Running On Port ${port}`);
+    });
+})
+.catch((e) => {
+    console.log("ERROR", e);
+});
