@@ -13,6 +13,7 @@ const mongo_url = process.env.mongo_url;
 
 const { createAccount, login, logout } = require("./controllers/user");
 const {createProduct,getProducts,deleteProduct} = require("./controllers/product")
+const { getCart, addToCart, updateCartQty, removeFromCart, clearCart } = require("./controllers/cart");
 
 const auth = require("./middleware/auth");
 
@@ -26,6 +27,13 @@ app.post("/logout", logout);
 app.post("/create-product", createProduct);
 app.get("/get-products",getProducts);
 app.get("/api/delete-products/:id",deleteProduct);
+
+// Authenticated Cart Routes
+app.get("/cart", auth, getCart);
+app.post("/cart/add", auth, addToCart);
+app.post("/cart/update", auth, updateCartQty);
+app.post("/cart/remove", auth, removeFromCart);
+app.post("/cart/clear", auth, clearCart);
 
 mongoose.connect(mongo_url)
 .then(() => {
