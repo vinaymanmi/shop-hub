@@ -1,20 +1,22 @@
 import React from 'react'
-import {BrowserRouter, Routes, Route, Link} from "react-router-dom"
+import {BrowserRouter, Routes, Route} from "react-router-dom"
 import './App.css';
 
 import Login from "./pages/Login"
 import Signin from './pages/Signin'
 import Home from './pages/Home'
+import Cart from './pages/Cart'
+import Logout from './pages/Logout'
 
 const App = () => {
   return (
     <div>
-
-    <BrowserRouter>
+      <BrowserRouter>
         <Routes>
           <Route path='/' element={<Login />} />
           <Route path='/signin' element={<Signin />} />
-          <Route path='/logout' element={<Login />} />
+          <Route path='/logout' element={<Logout />} />
+          <Route path='/cart' element={<Cart />} />
           <Route path='/home' element={<Home />} />
         </Routes>
       </BrowserRouter>

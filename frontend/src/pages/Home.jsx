@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const products = [
   {
@@ -363,6 +365,61 @@ const products = [
 ]
 
 const Home = () => {
+  const [cart, setCart] = useState([]);
+  const navigate = useNavigate();
+
+  // Fetch cart from backend on mount
+  useEffect(() => {
+    const fetchCart = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return; // Not logged in
+      try {
+        const response = await axios.get("http://localhost:5000/cart", {
+          headers: { Authorization: token }
+        });
+        if (response.data && response.data.items) {
+          setCart(response.data.items);
+        }
+      } catch (e) {
+        console.error("Error fetching cart from DB:", e);
+      }
+    };
+    fetchCart();
+  }, []);
+
+  const addToCart = async (product) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to add items to cart.");
+      navigate("/");
+      return;
+    }
+    try {
+      const response = await axios.post("http://localhost:5000/cart/add", {
+        productId: product.id,
+        name: product.name,
+        priceCents: product.priceCents,
+        category: product.category,
+        image: product.image,
+        description: product.description
+      }, {
+        headers: { Authorization: token }
+      });
+      
+      if (response.data && response.data.items) {
+        setCart(response.data.items);
+        alert(`${product.name} added to cart`);
+      }
+    } catch (e) {
+      console.error("Error adding to cart DB:", e);
+      alert("Not add to cart. Please try again.");
+    }
+  };
+
+  const getCartTotalCount = () => {
+    return cart.reduce((acc, item) => acc + item.quantity, 0);
+  };
+
   return (
     <main className="home-page">
       <header className="home-navbar">
@@ -374,19 +431,27 @@ const Home = () => {
         </div>
 
         <div className="navbar-actions">
-          <button type="button" className="nav-link logout-btn">
+          <button 
+            type="button" 
+            className="nav-link logout-btn"
+            onClick={() => navigate("/logout")}
+            style={{ cursor: "pointer", border: "none", background: "transparent" }}
+          >
             Logout
           </button>
-          <div className="cart-badge">
-            🛒<span>3</span>
+          <div 
+            className="cart-badge"
+            onClick={() => navigate("/cart")}
+            style={{ cursor: "pointer" }}
+          >
+            🛒<span>{getCartTotalCount()}</span>
           </div>
         </div>
       </header>
 
       <section className="home-hero">
         {/* <div><img src="https://www.shutterstock.com/image-vector/mega-sale-vector-banner-abstract-260nw-2695409101.jpg" alt="Advertizement" /></div> */}
-
-         </section>
+      </section>
 
 
     <section className="product-section">
@@ -434,6 +499,7 @@ const Home = () => {
                 <button
                 type="button"
                 className="add-button"
+                onClick={() => addToCart(product)}
                 >
                 Add to cart
                 </button>

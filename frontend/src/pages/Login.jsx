@@ -1,43 +1,70 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { useState } from 'react'
 
 const Login = () => {
     const [email,setEmail] = useState("");
     const [password,setPassword] = useState("")
+    const navigate = useNavigate();
 
     const login=async () => {
-        const response = await axios.post("http://localhost:5000/login",{email,password});
-        alert(response.data.message)
+        if (!email || !password) {
+            alert("Please fill in all fields");
+            return;
+        }
+        try {
+            const response = await axios.post("http://localhost:5000/login",{email,password});
+            // If response.data is string, it's an error message from express try-catch.
+            if (typeof response.data === 'string') {
+                alert(response.data);
+            } else if (response.data && response.data.token) {
+                localStorage.setItem("token", response.data.token);
+                localStorage.setItem("email", email);
+                alert("Login Success!");
+                navigate("/home");
+            } else {
+                alert(response.data?.message || "Login failed");
+            }
+        } catch (e) {
+            alert("Error logging in: " + e.message);
+        }
     }
+
   return (
-    <div>
-        <h2>Login Account</h2>
+    <div className="auth-container">
+        <div className="auth-card">
+            <h2>Welcome Back</h2>
+            <p className="auth-subtitle">Login to your ShopHub account</p>
 
-        <input type="email" placeholder='email@gmail.com' onChange={(e) => {
-            setEmail(e.target.value);
-            require
-        }}/>
+            <div className="auth-form-group">
+                <label>Email Address</label>
+                <input 
+                    type="email" 
+                    className="auth-input" 
+                    placeholder='email@gmail.com' 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+            </div>
 
-        <br /><br />
+            <div className="auth-form-group">
+                <label>Password</label>
+                <input 
+                    type="password" 
+                    className="auth-input" 
+                    placeholder='Enter your password' 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+            </div>
 
-        <input type="password" placeholder='Password' onChange={(e) => {
-            setPassword(e.target.value);
-            require
-        }}/>
+            <button className="auth-button" onClick={login}>Login</button>
 
-        {/* <h2>{email,password}</h2> */}
-        <br /><br />
-
-        <button onClick={login}>Login</button>
-
-        <br /><br />
-
-        <p>Don't have an account?
-            <Link to="/signin">Sign in</Link>
-        </p>
-        
+            <p className="auth-footer">
+                Don't have an account? 
+                <Link to="/signin">Sign in</Link>
+            </p>
+        </div>
     </div>
   )
 }
