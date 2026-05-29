@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 const Login = () => {
     const [email,setEmail] = useState("");
     const [password,setPassword] = useState("")
@@ -13,8 +15,7 @@ const Login = () => {
             return;
         }
         try {
-            const response = await axios.post("http://localhost:5000/login",{email,password});
-            // If response.data is string, it's an error message from express try-catch.
+            const response = await axios.post(`${BASE_URL}/login`,{email,password});
             if (typeof response.data === 'string') {
                 alert(response.data);
             } else if (response.data && response.data.token) {

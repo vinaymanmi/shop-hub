@@ -138,7 +138,7 @@ input {
   height: 280px;
   width: 100%;
   border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 0 20px 3px rgba(50, 35, 255, 0.201);
 }
 
 .eyebrow {
@@ -343,13 +343,13 @@ input {
   }
 }
 
-/* Auth Pages Styles */
+
 .auth-container {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #f5f7fb;
+  background: #cdd9e4;
   padding: 20px;
 }
 
@@ -362,6 +362,7 @@ input {
   max-width: 440px;
   text-align: center;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 0 20px 3px rgba(50, 35, 255, 0.201);
 }
 
 .auth-card h2,
@@ -409,11 +410,11 @@ input {
 
 .auth-input:focus {
   border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 2px 3px rgba(99, 102, 241, 0.15);
 }
 
 .auth-button {
-  width: 100%;
+  width: 50%;
   border: none;
   background: #4f46e5;
   color: white;
@@ -428,6 +429,7 @@ input {
 
 .auth-button:hover {
   background: #4338ca;
+  box-shadow: 0 0 2px 1px rgb(164, 161, 255);
 }
 
 .auth-button:active {
@@ -486,7 +488,7 @@ input {
   margin: 0 0 24px;
 }
 
-/* Cart Page Styles */
+
 .cart-page-container {
   min-height: 100vh;
   padding: 120px 24px 24px;
@@ -762,7 +764,51 @@ input {
 }
 
 footer{
+  margin-top: 10%;
   height: 40vh;
   width: 100%;
-  background-color: #586781;
+  background-color: #232F3E;
+  display: flex;
+  gap: 80px;
+  width:100%;
+}
+footer div{
+  padding: 30px 0 0 20px;
+}
+
+footer p{
+  margin-left: 40px;
+  font-weight: bold;
+  color: rgb(209, 202, 202);
+}
+
+footer ul li{
+  list-style: none;
+}
+
+footer ul li a{
+  text-decoration: none;
+  color: #adadad;
+}
+
+footer ul li a:hover{
+  text-decoration: underline;
+  color: #ffffff;
+}
+
+footer .images img{
+  height: 28px;
+  width: 28px;
+  filter: brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(20%) hue-rotate(32deg) brightness(90%) contrast(81%);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+footer .images{
+  display: flex;
+  gap: 20px;
+}
+
+footer .images :hover{
+  filter: brightness(0) saturate(100%) invert(100%) sepia(97%) saturate(13%) hue-rotate(254deg) brightness(103%) contrast(107%);
 }

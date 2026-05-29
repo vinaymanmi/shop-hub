@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 const products = [
   {
     id: 1,
@@ -374,7 +376,7 @@ const Home = () => {
       const token = localStorage.getItem("token");
       if (!token) return; // Not logged in
       try {
-        const response = await axios.get("http://localhost:5000/cart", {
+        const response = await axios.get(`${BASE_URL}/cart`, {
           headers: { Authorization: token }
         });
         if (response.data && response.data.items) {
@@ -395,7 +397,7 @@ const Home = () => {
       return;
     }
     try {
-      const response = await axios.post("http://localhost:5000/cart/add", {
+      const response = await axios.post(`${BASE_URL}/cart/add`, {
         productId: product.id,
         name: product.name,
         priceCents: product.priceCents,
@@ -421,6 +423,7 @@ const Home = () => {
   };
 
   return (
+    <div>
     <main className="home-page">
       <header className="home-navbar">
         <div className="store-brand">ShopHub</div>
@@ -450,20 +453,20 @@ const Home = () => {
       </header>
 
       <section className="home-hero">
-        {/* <div><img src="https://www.shutterstock.com/image-vector/mega-sale-vector-banner-abstract-260nw-2695409101.jpg" alt="Advertizement" /></div> */}
+        
       </section>
 
 
     <section className="product-section">
     <div className="section-header">
-        <h2>Featured student picks</h2>
+        <h2>Featured Picks</h2>
 
-        <button type="button" className="view-all-button">
+        <button type="button" id='products' className="view-all-button">
         View all products
         </button>
     </div>
 
-    <div className="product-grid">
+    <div id='products' className="product-grid">
 
         {products.map((product) => (
 
@@ -514,9 +517,60 @@ const Home = () => {
 
     </div>
     </section>
+    
 
 
     </main>
+    <footer>
+        <div>
+          <p>ABOUT</p>
+        <ul>
+            <li><a href="#">Contact US</a></li>
+            <li><a href="#">About US</a></li>
+            <li><a href="#">ShopHub Stories</a></li>
+            <li><a href="#">Contact US</a></li>
+            <li><a href="#">Corporate information</a></li>
+        </ul>
+        </div>
+
+        <div>
+          <p>GROUP COMPANIES</p>
+          <ul>
+              <li><a href="#">Flipkart</a></li>
+              <li><a href="#">Amazon</a></li>
+              <li><a href="#">Shopsy</a></li>
+          </ul>
+        </div>
+
+       <div>
+         <p>HELP</p>
+        <ul>
+            <li><a href="#">Payment</a></li>
+            <li><a href="#">Cancellation & Returns</a></li>
+            <li><a href="#">Shipping</a></li>
+            <li><a href="#">FAQ</a></li>
+        </ul>
+       </div>
+
+       
+       <div>
+         <p>CONTACT HELP</p>
+        <ul>
+            <li><a href="#">vinaymanmi08@gmail.com</a></li>
+            <li><a href="#">8861853790</a></li>
+            <li><a href="#">8970097433</a></li>
+        </ul>
+       </div>
+       <div>
+        <div className="images">
+          <img src="https://www.svgrepo.com/show/75820/linkedin.svg" alt="linkedIn" />
+          <img src="https://www.svgrepo.com/show/13639/instagram.svg" alt="instagram" />
+          <img src="https://www.svgrepo.com/show/13677/twitter.svg" alt="twitter" />
+          <img src="https://www.svgrepo.com/show/13671/youtube.svg" alt="youtube" />
+        </div>
+       </div>
+    </footer>
+    </div>
   );
 };
 

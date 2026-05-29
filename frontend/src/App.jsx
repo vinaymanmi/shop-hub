@@ -21,7 +21,7 @@ const App = () => {
           <Route path='/home' element={<Home />} />
         </Routes>
       </BrowserRouter>
-      <Footer/>
+      
     </div>
   )
 }

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 const Cart = () => {
     const [cart, setCart] = useState([]);
     const navigate = useNavigate();
 
-    // Fetch cart from backend on mount
     const fetchCart = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -15,7 +16,7 @@ const Cart = () => {
             return;
         }
         try {
-            const response = await axios.get("http://localhost:5000/cart", {
+            const response = await axios.get(`${BASE_URL}/cart`, {
                 headers: { Authorization: token }
             });
             if (response.data && response.data.items) {
@@ -30,11 +31,10 @@ const Cart = () => {
         fetchCart();
     }, []);
 
-    // Increase quantity
     const increaseQty = async (productId, currentQty) => {
         const token = localStorage.getItem("token");
         try {
-            const response = await axios.post("http://localhost:5000/cart/update", {
+            const response = await axios.post(`${BASE_URL}/cart/update`,{
                 productId,
                 quantity: currentQty + 1
             }, {
@@ -48,11 +48,10 @@ const Cart = () => {
         }
     };
 
-    // Decrease quantity
     const decreaseQty = async (productId, currentQty) => {
         const token = localStorage.getItem("token");
         try {
-            const response = await axios.post("http://localhost:5000/cart/update", {
+            const response = await axios.post(`${BASE_URL}/cart/update`, {
                 productId,
                 quantity: currentQty - 1
             }, {
@@ -70,7 +69,7 @@ const Cart = () => {
     const removeItem = async (productId) => {
         const token = localStorage.getItem("token");
         try {
-            const response = await axios.post("http://localhost:5000/cart/remove", {
+            const response = await axios.post(`${BASE_URL}/cart/remove`, {
                 productId
             }, {
                 headers: { Authorization: token }
@@ -91,25 +90,25 @@ const Cart = () => {
     const getDeliveryFee = () => {
         const subtotal = getSubtotal();
         if (subtotal === 0) return 0;
-        return subtotal >= 500 ? 0 : 50; // Free delivery above 500 rupees
+        return subtotal >= 500 ? 0 : 50;
     };
 
     const getTax = () => {
-        return getSubtotal() * 0.05; // 5% flat GST
+        return getSubtotal() * 0.05;
     };
 
     const getOrderTotal = () => {
         return getSubtotal() + getDeliveryFee() + getTax();
     };
 
-    // Handle Checkout Mock
+    
     const handleCheckout = async () => {
         const token = localStorage.getItem("token");
         try {
-            await axios.post("http://localhost:5000/cart/clear", {}, {
+            await axios.post(`${BASE_URL}/cart/clear`, {}, {
                 headers: { Authorization: token }
             });
-            alert("🎉 Order placed successfully! Thank you for choosing ShopHub.");
+            alert("🎉 Order placed successfully!");
             setCart([]);
             navigate("/home");
         } catch (e) {
@@ -120,7 +119,6 @@ const Cart = () => {
 
     return (
         <div>
-            {/* Embedded Header matching Home Navbar but customized for Cart */}
             <header className="home-navbar">
                 <div className="store-brand" onClick={() => navigate("/home")} style={{ cursor: 'pointer' }}>
                     ShopHub
