@@ -7,7 +7,6 @@ import Signin from './pages/Signin'
 import Home from './pages/Home'
 import Cart from './pages/Cart'
 import Logout from './pages/Logout'
-import Footer from './pages/Footer';
 
 const App = () => {
   return (
