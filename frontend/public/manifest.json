@@ -1,0 +1,26 @@
+{
+  "short_name": "ShopHub",
+  "name": "ShopHub Premium Student Store",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#05050A",
+  "theme_color": "#0D0B1A",
+  "display": "standalone",
+  "orientation": "portrait"
+}

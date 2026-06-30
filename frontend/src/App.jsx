@@ -7,10 +7,11 @@ import Signin from './pages/Signin'
 import Home from './pages/Home'
 import Cart from './pages/Cart'
 import Logout from './pages/Logout'
+import { ToastProvider } from './context/ToastContext'
 
 const App = () => {
   return (
-    <div>
+    <ToastProvider>
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Login />} />
@@ -20,8 +21,7 @@ const App = () => {
           <Route path='/home' element={<Home />} />
         </Routes>
       </BrowserRouter>
-      
-    </div>
+    </ToastProvider>
   )
 }
 

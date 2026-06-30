@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -364,17 +366,91 @@ const products = [
     keywords: ["flipflops", "slippers", "casual", "footwear"],
     description: "Lightweight and comfortable flip-flops for daily use."
   }
-]
+];
+
+// Reusable 3D Tilt Card Component
+const ProductCard = ({ product, onAddToCart, variants }) => {
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    // Calculate normalized relative coords (-0.5 to 0.5)
+    const mouseX = (e.clientX - rect.left) / width - 0.5;
+    const mouseY = (e.clientY - rect.top) / height - 0.5;
+    
+    setTilt({
+      x: mouseY * -15, // rotation around X-axis
+      y: mouseX * 15   // rotation around Y-axis
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+  };
+
+  return (
+    <motion.article 
+      variants={variants}
+      className="product-card"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+        transformStyle: 'preserve-3d',
+        transition: tilt.x === 0 && tilt.y === 0 ? 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)' : 'none'
+      }}
+      whileHover={{ 
+        y: -6, 
+        borderColor: "rgba(255, 42, 109, 0.4)",
+        boxShadow: "0px 0px 25px rgba(255, 42, 109, 0.3)"
+      }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <div className="product-media" style={{ transform: 'translateZ(20px)' }}>
+        <div className="product-image">
+          <img src={product.image} alt={product.name} />
+        </div>
+        <div className="product-badge">
+          ⭐ {product.rating.stars}
+        </div>
+      </div>
+
+      <div className="product-content" style={{ transform: 'translateZ(10px)' }}>
+        <h3>{product.name}</h3>
+        <p>{product.description}</p>
+        
+        <div className="product-footer">
+          <span className="product-price">
+            ₹{product.priceCents / 100}
+          </span>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            className="add-button"
+            onClick={() => onAddToCart(product)}
+          >
+            Add to cart
+          </motion.button>
+        </div>
+      </div>
+    </motion.article>
+  );
+};
 
 const Home = () => {
   const [cart, setCart] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
-  // Fetch cart from backend on mount
+  // Fetch cart on mount
   useEffect(() => {
     const fetchCart = async () => {
       const token = localStorage.getItem("token");
-      if (!token) return; // Not logged in
+      if (!token) return;
       try {
         const response = await axios.get(`${BASE_URL}/cart`, {
           headers: { Authorization: token }
@@ -392,7 +468,7 @@ const Home = () => {
   const addToCart = async (product) => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login to add items to cart.");
+      showToast("Please login to add items to cart.", "error");
       navigate("/");
       return;
     }
@@ -410,11 +486,11 @@ const Home = () => {
       
       if (response.data && response.data.items) {
         setCart(response.data.items);
-        alert(`${product.name} added to cart`);
+        showToast(`${product.name} added to cart!`, "success");
       }
     } catch (e) {
       console.error("Error adding to cart DB:", e);
-      alert("Not add to cart. Please try again.");
+      showToast("Could not add to cart. Please try again.", "error");
     }
   };
 
@@ -422,155 +498,179 @@ const Home = () => {
     return cart.reduce((acc, item) => acc + item.quantity, 0);
   };
 
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Framer Motion Orchestrations
+  const pageContainerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const navbarVariants = {
+    hidden: { y: -60, opacity: 0 },
+    show: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 120, damping: 15 } }
+  };
+
+  const heroVariants = {
+    hidden: { scale: 0.96, opacity: 0 },
+    show: { scale: 1, opacity: 1, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
+  };
+
+  const gridVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.04
+      }
+    }
+  };
+
+  const cardEntranceVariants = {
+    hidden: { y: 30, opacity: 0 },
+    show: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100, damping: 14 } }
+  };
+
   return (
-    <div>
-    <main className="home-page">
-      <header className="home-navbar">
-        <div className="store-brand">ShopHub</div>
+    <motion.div 
+      initial="hidden"
+      animate="show"
+      variants={pageContainerVariants}
+    >
+      <main className="home-page">
+        {/* Navbar drops */}
+        <motion.header variants={navbarVariants} className="home-navbar">
+          <div className="store-brand" onClick={() => navigate("/home")}>ShopHub</div>
 
-        <div className="navbar-search">
-          <input type="search" placeholder="Search products..." />
-          <button type="button">Search</button>
-        </div>
-
-        <div className="navbar-actions">
-          <button 
-            type="button" 
-            className="nav-link logout-btn"
-            onClick={() => navigate("/logout")}
-            style={{ cursor: "pointer", border: "none", background: "transparent" }}
-          >
-            Logout
-          </button>
-          <div 
-            className="cart-badge"
-            onClick={() => navigate("/cart")}
-            style={{ cursor: "pointer" }}
-          >
-            🛒<span>{getCartTotalCount()}</span>
+          <div className="navbar-search">
+            <input 
+              type="search" 
+              placeholder="Search products..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button type="button">Search</button>
           </div>
-        </div>
-      </header>
 
-      <section className="home-hero">
-        
-      </section>
+          <div className="navbar-actions">
+            <button 
+              type="button" 
+              className="nav-link logout-btn"
+              onClick={() => navigate("/logout")}
+              style={{ cursor: "pointer", border: "none", background: "transparent" }}
+            >
+              Logout
+            </button>
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="cart-badge"
+              onClick={() => navigate("/cart")}
+              style={{ cursor: "pointer" }}
+            >
+              🛒<span>{getCartTotalCount()}</span>
+            </motion.div>
+          </div>
+        </motion.header>
 
+        {/* Hero Scales Up */}
+        <motion.section 
+          variants={heroVariants} 
+          className="home-hero"
+        />
 
-    <section className="product-section">
-    <div className="section-header">
-        <h2>Featured Picks</h2>
+        <motion.section 
+          variants={heroVariants}
+          className="product-section"
+        >
+          <div className="section-header">
+            <h2>Featured Picks</h2>
+            <button type="button" id='products' className="view-all-button">
+              View all products
+            </button>
+          </div>
 
-        <button type="button" id='products' className="view-all-button">
-        View all products
-        </button>
-    </div>
+          {/* Cards ripple onto screen */}
+          <motion.div 
+            id='products' 
+            variants={gridVariants} 
+            className="product-grid"
+          >
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onAddToCart={addToCart}
+                variants={cardEntranceVariants}
+              />
+            ))}
+          </motion.div>
+        </motion.section>
+      </main>
 
-    <div id='products' className="product-grid">
-
-        {products.map((product) => (
-
-        <article key={product.id} className="product-card">
-
-            <div className="product-media">
-
-            <div className="product-image">
-                <img
-                src={product.image}
-                alt={product.name}
-                />
-            </div>
-
-            <div className="product-badge">
-                ⭐ {product.rating.stars}
-            </div>
-
-            </div>
-
-            <div className="product-content">
-
-            <h3>{product.name}</h3>
-
-            <p>{product.description}</p>
-
-            <div className="product-footer">
-
-                <span className="product-price">
-                ₹{product.priceCents / 100}
-                </span>
-
-                <button
-                type="button"
-                className="add-button"
-                onClick={() => addToCart(product)}
-                >
-                Add to cart
-                </button>
-
-            </div>
-
-            </div>
-
-        </article>
-
-        ))}
-
-    </div>
-    </section>
-    
-
-
-    </main>
-    <footer>
+      <motion.footer 
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
         <div>
           <p>ABOUT</p>
-        <ul>
+          <ul>
             <li><a href="#">Contact US</a></li>
             <li><a href="#">About US</a></li>
             <li><a href="#">ShopHub Stories</a></li>
-            <li><a href="#">Contact US</a></li>
             <li><a href="#">Corporate information</a></li>
-        </ul>
+          </ul>
         </div>
 
         <div>
           <p>GROUP COMPANIES</p>
           <ul>
-              <li><a href="#">Flipkart</a></li>
-              <li><a href="#">Amazon</a></li>
-              <li><a href="#">Shopsy</a></li>
+            <li><a href="#">Flipkart</a></li>
+            <li><a href="#">Amazon</a></li>
+            <li><a href="#">Shopsy</a></li>
           </ul>
         </div>
 
-       <div>
-         <p>HELP</p>
-        <ul>
+        <div>
+          <p>HELP</p>
+          <ul>
             <li><a href="#">Payment</a></li>
             <li><a href="#">Cancellation & Returns</a></li>
             <li><a href="#">Shipping</a></li>
             <li><a href="#">FAQ</a></li>
-        </ul>
-       </div>
+          </ul>
+        </div>
 
-       
-       <div>
-         <p>CONTACT HELP</p>
-        <ul>
+        <div>
+          <p>CONTACT HELP</p>
+          <ul>
             <li><a href="#">vinaymanmi08@gmail.com</a></li>
             <li><a href="#">8861853790</a></li>
             <li><a href="#">8970097433</a></li>
-        </ul>
-       </div>
-       <div>
-        <div className="images">
-          <img src="https://www.svgrepo.com/show/75820/linkedin.svg" alt="linkedIn" />
-          <img src="https://www.svgrepo.com/show/13639/instagram.svg" alt="instagram" />
-          <img src="https://www.svgrepo.com/show/13677/twitter.svg" alt="twitter" />
-          <img src="https://www.svgrepo.com/show/13671/youtube.svg" alt="youtube" />
+          </ul>
         </div>
-       </div>
-    </footer>
-    </div>
+
+        <div>
+          <div className="images">
+            <img src="https://www.svgrepo.com/show/75820/linkedin.svg" alt="linkedIn" />
+            <img src="https://www.svgrepo.com/show/13639/instagram.svg" alt="instagram" />
+            <img src="https://www.svgrepo.com/show/13677/twitter.svg" alt="twitter" />
+            <img src="https://www.svgrepo.com/show/13671/youtube.svg" alt="youtube" />
+          </div>
+        </div>
+      </motion.footer>
+    </motion.div>
   );
 };
 
